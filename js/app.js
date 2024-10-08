@@ -8,12 +8,46 @@ var BALL_IMG = '<img src="img/ball.png" />';
 
 var gBoard;
 var gGamerPos;
+
+let countWins = 0;
+let countBall = 2;
+let intervalBalls = null;
+
 function initGame() {
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
 	renderBoard(gBoard);
+	addBalls();
 }
 
+function renderCountWins(countWins) {
+	let numberOFwins = document.getElementById('countWins');
+	numberOFwins.innerHTML = countWins;
+}
+
+function addBalls() {
+	intervalBalls = setInterval(() => {
+		let cell;
+		let row;
+		let column;
+		do {
+			row = Math.floor(Math.random() * 8) + 1;
+			column = Math.floor(Math.random() * 10) + 1;
+			cell = document.getElementsByClassName(`cell cell-${row}-${column} floor`)[0];
+		} while (!cell || cell.querySelector('img')); 
+
+		cell.insertAdjacentHTML('beforeend', BALL_IMG);
+		gBoard[row][column].gameElement = BALL;
+		countBall++;
+	}, 3000);
+}
+
+function checkWin(countBall) {
+	if (!countBall) {
+		alert('winner!!');
+		clearInterval(intervalBalls);
+	}
+}
 
 function buildBoard() {
 	// Create the Matrix
@@ -46,7 +80,6 @@ function buildBoard() {
 	board[3][8].gameElement = BALL;
 	board[7][4].gameElement = BALL;
 
-	console.log(board);
 	return board;
 }
 
@@ -61,18 +94,17 @@ function renderBoard(board) {
 
 			var cellClass = getClassName({ i: i, j: j })
 
-			// TODO - change to short if statement
-			if (currCell.type === FLOOR) cellClass += ' floor';
-			else if (currCell.type === WALL) cellClass += ' wall';
+			cellClass += currCell.type === FLOOR ? ' floor' : ' wall';
 
-			//TODO - Change To ES6 template string
-			strHTML += '\t<td class="cell ' + cellClass + '"  onclick="moveTo(' + i + ',' + j + ')" >\n';
+			strHTML += `\t<td class="cell ${cellClass}" onclick="moveTo(${i}, ${j})">\n`;
 
-			// TODO - change to switch case statement
-			if (currCell.gameElement === GAMER) {
-				strHTML += GAMER_IMG;
-			} else if (currCell.gameElement === BALL) {
-				strHTML += BALL_IMG;
+			switch (currCell.gameElement) {
+				case GAMER:
+					strHTML += GAMER_IMG;
+					break;
+				case BALL:
+					strHTML += BALL_IMG;
+					break;
 			}
 
 			strHTML += '\t</td>\n';
@@ -80,8 +112,6 @@ function renderBoard(board) {
 		strHTML += '</tr>\n';
 	}
 
-	console.log('strHTML is:');
-	console.log(strHTML);
 	var elBoard = document.querySelector('.board');
 	elBoard.innerHTML = strHTML;
 }
@@ -101,6 +131,8 @@ function moveTo(i, j) {
 
 		if (targetCell.gameElement === BALL) {
 			console.log('Collecting!');
+			renderCountWins(++countWins);
+			checkWin(--countBall);
 		}
 
 		// MOVING from current position
