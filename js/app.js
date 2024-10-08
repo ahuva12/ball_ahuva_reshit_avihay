@@ -14,6 +14,8 @@ let countBall = 2;
 let intervalBalls = null;
 
 function initGame() {
+	countWins = 0;
+    countBall = 2;
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
 	renderBoard(gBoard);
@@ -46,6 +48,9 @@ function checkWin(countBall) {
 	if (!countBall) {
 		alert('winner!!');
 		clearInterval(intervalBalls);
+		const restartButton = document.getElementById('restart');
+		restartButton.style.display = 'block';
+		renderCountWins(0);
 	}
 }
 
