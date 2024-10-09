@@ -19,12 +19,19 @@ function initGame() {
 	gGamerPos = { i: 2, j: 9 };
 	gBoard = buildBoard();
 	renderBoard(gBoard);
+	renderRestartButton('none')
+	renderCountWins(countWins);
 	addBalls();
 }
 
 function renderCountWins(countWins) {
 	let numberOFwins = document.getElementById('countWins');
 	numberOFwins.innerHTML = countWins;
+}
+
+function renderRestartButton(mode) {
+	const restartButton = document.getElementById('restart');
+	restartButton.style.display = mode;
 }
 
 function addBalls() {
@@ -48,9 +55,7 @@ function checkWin(countBall) {
 	if (!countBall) {
 		alert('winner!!');
 		clearInterval(intervalBalls);
-		const restartButton = document.getElementById('restart');
-		restartButton.style.display = 'block';
-		renderCountWins(0);
+		renderRestartButton('block')
 	}
 }
 
