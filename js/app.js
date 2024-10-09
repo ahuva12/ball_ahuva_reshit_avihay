@@ -40,15 +40,15 @@ function addBalls() {
 		let row;
 		let column;
 		do {
-			row = Math.floor(Math.random() * 8) + 1;
-			column = Math.floor(Math.random() * 10) + 1;
+			row = Math.floor(Math.random() * 9) + 1;
+			column = Math.floor(Math.random() * 11) + 1;
 			cell = document.getElementsByClassName(`cell cell-${row}-${column} floor`)[0];
 		} while (!cell || cell.querySelector('img')); 
 
 		cell.insertAdjacentHTML('beforeend', BALL_IMG);
 		gBoard[row][column].gameElement = BALL;
 		countBall++;
-	}, 3000);
+	}, 2000);
 }
 
 function checkWin(countBall) {
@@ -62,9 +62,9 @@ function checkWin(countBall) {
 function buildBoard() {
 	// Create the Matrix
 	// var board = createMat(10, 12)
-	var board = new Array(10);
+	var board = new Array(11);
 	for (var i = 0; i < board.length; i++) {
-		board[i] = new Array(12);
+		board[i] = new Array(13);
 	}
 
 	// Put FLOOR everywhere and WALL at edges
@@ -74,7 +74,16 @@ function buildBoard() {
 			var cell = { type: FLOOR, gameElement: null };
 
 			// Place Walls at edges
-			if (i === 0 || i === board.length - 1 || j === 0 || j === board[0].length - 1) {
+			if (
+				(i === 0 || i === board.length - 1 || j === 0 || j === board[0].length - 1) && 
+				(
+					!(i === 0 && j === Math.floor((board[0].length)/2)) &&
+					!(i === board.length - 1 && j === Math.floor((board[0].length)/2))&&
+					!(i === Math.floor((board.length)/2) && j === 0) &&
+					!(i === Math.floor((board.length)/2) && Math.floor((board[0].length)/2))
+				)
+			)
+			{
 				cell.type = WALL;
 			}
 
@@ -128,19 +137,27 @@ function renderBoard(board) {
 
 // Move the player to a specific location
 function moveTo(i, j) {
+	if (i === -1 && j === Math.floor(gBoard[0].length/2)) 
+		i = gBoard.length - 1;
+	else if (i === gBoard.length && j === Math.floor(gBoard[0].length/2))
+		i = 0;
+	else if (j === gBoard[0].length && i === Math.floor(gBoard.length/2)) 
+		j = 0;
+	else if (j === -1 && i === Math.floor(gBoard.length/2))
+		j = gBoard[0].length - 1;
+	else {
+		// Calculate distance to make sure we are moving to a neighbor cell
+		var iAbsDiff = Math.abs(i - gGamerPos.i);
+		var jAbsDiff = Math.abs(j - gGamerPos.j);
+	}
 
 	var targetCell = gBoard[i][j];
 	if (targetCell.type === WALL) return;
 
-	// Calculate distance to make sure we are moving to a neighbor cell
-	var iAbsDiff = Math.abs(i - gGamerPos.i);
-	var jAbsDiff = Math.abs(j - gGamerPos.j);
-
 	// If the clicked Cell is one of the four allowed
-	if ((iAbsDiff === 1 && jAbsDiff === 0) || (jAbsDiff === 1 && iAbsDiff === 0)) {
+	if ((!iAbsDiff && !jAbsDiff) || (iAbsDiff === 1 && jAbsDiff === 0) || (jAbsDiff === 1 && iAbsDiff === 0)) {
 
 		if (targetCell.gameElement === BALL) {
-			console.log('Collecting!');
 			renderCountWins(++countWins);
 			checkWin(--countBall);
 		}
@@ -198,7 +215,6 @@ function handleKey(event) {
 // Returns the class name for a specific cell
 function getClassName(location) {
 	var cellClass = 'cell-' + location.i + '-' + location.j;
-	console.log('cellClass:', cellClass);
 	return cellClass;
 }
 
